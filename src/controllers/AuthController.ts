@@ -20,12 +20,12 @@ class AuthController {
     try {
       user = await userRepository.findOneOrFail({ where: { username } });
     } catch (error) {
-      res.status(401).send();
+      res.status(401).send({success: false, message: 'User not found.'});
     }
 
     //Check if encrypted password match
     if (!user.checkIfUnencryptedPasswordIsValid(password)) {
-      res.status(401).send();
+      res.status(401).send({success: false, message: 'Invalid password.'});
       return;
     }
 
@@ -56,12 +56,12 @@ class AuthController {
     try {
       user = await userRepository.findOneOrFail(id);
     } catch (id) {
-      res.status(401).send();
+      res.status(401).send({success: false, message: 'User not found.'});
     }
 
     //Check if old password matchs
     if (!user.checkIfUnencryptedPasswordIsValid(oldPassword)) {
-      res.status(401).send();
+      res.status(401).send({success: false, message: 'Invalid password.'});
       return;
     }
 
@@ -74,9 +74,8 @@ class AuthController {
     }
     //Hash the new password and save
     user.hashPassword();
-    userRepository.save(user);
-
-    res.status(204).send();
+    await userRepository.save(user);
+    res.status(200).send({success: true, message: "Password Changed Successfully."});
   };
 }
 export default AuthController;
